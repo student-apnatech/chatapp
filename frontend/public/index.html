@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ChatApp</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>💬</text></svg>">
+<script src="/socket.io/socket.io.js"></script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════
+     AUTH SCREEN
+══════════════════════════════════════════════════════ -->
+<div id="authScreen">
+
+  <!-- WELCOME / SPLASH -->
+  <div id="splashPage" class="auth-page active">
+    <div class="splash-inner">
+      <div class="splash-logo">💬</div>
+      <h1 class="splash-title">ChatApp</h1>
+      <p class="splash-sub">Connect with anyone, anywhere</p>
+      <div class="splash-btns">
+        <button class="btn-primary" onclick="showPage('loginPage')">Sign In</button>
+        <button class="btn-outline" onclick="showPage('registerPage')">Create Account</button>
+      </div>
+      <p class="splash-footer">🔒 End-to-end encrypted · Free forever</p>
+    </div>
+  </div>
+
+  <!-- LOGIN -->
+  <div id="loginPage" class="auth-page">
+    <div class="auth-card">
+      <button class="back-btn" onclick="showPage('splashPage')">← Back</button>
+      <div class="auth-logo">💬</div>
+      <h2>Welcome back</h2>
+      <p class="auth-desc">Sign in with your phone number</p>
+
+      <div class="form-group">
+        <label>📱 Phone Number</label>
+        <input type="tel" id="loginPhone" placeholder="e.g. +91 9876543210" autocomplete="tel">
+      </div>
+      <div class="form-group">
+        <label>🔒 Password</label>
+        <div class="pw-wrap">
+          <input type="password" id="loginPass" placeholder="Your password" autocomplete="current-password">
+          <button class="pw-eye" onclick="togglePw('loginPass',this)">👁</button>
+        </div>
+      </div>
+      <div class="auth-error" id="loginError"></div>
+      <button class="btn-primary full" id="loginBtn" onclick="login()">Sign In</button>
+      <p class="auth-switch">New here? <a onclick="showPage('registerPage')">Create account</a></p>
+    </div>
+  </div>
+
+  <!-- REGISTER -->
+  <div id="registerPage" class="auth-page">
+    <div class="auth-card">
+      <button class="back-btn" onclick="showPage('splashPage')">← Back</button>
+      <div class="auth-logo">✨</div>
+      <h2>Create account</h2>
+      <p class="auth-desc">Join and start chatting instantly</p>
+
+      <div class="form-group">
+        <label>👤 Full Name</label>
+        <input type="text" id="regName" placeholder="Your full name" autocomplete="name">
+      </div>
+      <div class="form-group">
+        <label>📱 Phone Number</label>
+        <input type="tel" id="regPhone" placeholder="e.g. +91 9876543210" autocomplete="tel">
+        <span class="form-hint">Include country code. Friends will find you by this number.</span>
+      </div>
+      <div class="form-group">
+        <label>🔒 Password</label>
+        <div class="pw-wrap">
+          <input type="password" id="regPass" placeholder="Min 6 characters" autocomplete="new-password">
+          <button class="pw-eye" onclick="togglePw('regPass',this)">👁</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <label>💬 About <span style="color:#8696a0;font-weight:400">(optional)</span></label>
+        <input type="text" id="regAbout" placeholder="Hey there! I am using ChatApp" maxlength="80">
+      </div>
+      <div class="auth-error" id="regError"></div>
+      <button class="btn-primary full" id="regBtn" onclick="register()">Create Account</button>
+      <p class="auth-switch">Already have an account? <a onclick="showPage('loginPage')">Sign in</a></p>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     MAIN APP
+══════════════════════════════════════════════════════ -->
+<div id="appScreen" style="display:none;">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar" id="sidebar">
+    <div class="sidebar-header">
+      <div class="my-avatar" id="myAvatarEl" onclick="openMyProfile()"></div>
+      <div class="hdr-title">ChatApp</div>
+      <div class="header-icons">
+        <button class="icon-btn" title="New group" onclick="openNewGroup()">👥</button>
+        <button class="icon-btn" title="Add contact" onclick="openAddContact()">➕</button>
+        <button class="icon-btn" title="Menu" onclick="showSideMenu(event)">⋮</button>
+      </div>
+    </div>
+    <div class="search-bar">
+      <div class="search-wrap">
+        <span>🔍</span>
+        <input type="text" id="searchInput" placeholder="Search chats..." oninput="filterChats(this.value)">
+        <button id="searchClear" onclick="clearSearch()" style="display:none;">✕</button>
+      </div>
+    </div>
+    <div class="filter-tabs">
+      <div class="ftab active" onclick="setTab(this,'all')">All</div>
+      <div class="ftab" onclick="setTab(this,'unread')">Unread</div>
+      <div class="ftab" onclick="setTab(this,'groups')">Groups</div>
+    </div>
+    <div class="chat-list" id="chatList">
+      <div class="empty-state">
+        <div style="font-size:48px;">💬</div>
+        <p>No chats yet</p>
+        <small>Tap ➕ to add a contact and start chatting</small>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAT AREA -->
+  <div class="chat-area">
+    <!-- No chat selected -->
+    <div class="no-chat" id="noChat">
+      <div class="nc-icon">💬</div>
+      <h2>ChatApp</h2>
+      <p>Add contacts and start messaging.<br>Your chats are end-to-end encrypted.</p>
+      <button class="btn-primary" onclick="openAddContact()">➕ Add Contact</button>
+    </div>
+
+    <!-- Chat window -->
+    <div id="chatWindow" style="display:none;flex:1;flex-direction:column;">
+      <!-- Header -->
+      <div class="chat-hdr">
+        <div class="chat-hdr-av" id="chatHdrAv" onclick="openContactInfo()"></div>
+        <div class="chat-hdr-info" onclick="openContactInfo()">
+          <div class="ch-name" id="chatHdrName"></div>
+          <div class="ch-status" id="chatHdrStatus"></div>
+        </div>
+        <div class="chat-hdr-actions">
+          <button class="icon-btn" onclick="toast('📹 Video call')">📹</button>
+          <button class="icon-btn" onclick="toast('📞 Voice call')">📞</button>
+          <button class="icon-btn" onclick="showChatMenu(event)">⋮</button>
+        </div>
+      </div>
+
+      <!-- Reply preview -->
+      <div id="replyBar" class="reply-bar" style="display:none;">
+        <div class="rb-border"></div>
+        <div class="rb-content">
+          <div class="rb-name" id="rbName"></div>
+          <div class="rb-text" id="rbText"></div>
+        </div>
+        <button class="rb-close" onclick="cancelReply()">✕</button>
+      </div>
+
+      <!-- Messages -->
+      <div class="messages" id="messagesEl"></div>
+
+      <!-- Typing indicator -->
+      <div class="typing-row" id="typingRow" style="display:none;">
+        <span id="typingName"></span>
+        <span class="typing-dots"><span></span><span></span><span></span></span>
+      </div>
+
+      <!-- Input -->
+      <div class="input-bar">
+        <div id="emojiPicker" class="emoji-picker" style="display:none;"></div>
+        <div id="attachMenu" class="attach-menu" style="display:none;"></div>
+        <button class="ibtn" onclick="toggleEmoji()" title="Emoji">😊</button>
+        <button class="ibtn" onclick="toggleAttach()" title="Attach">📎</button>
+        <textarea id="msgInput" class="msg-input" placeholder="Type a message..." rows="1"
+          oninput="onInput(this)" onkeydown="onKey(event)"></textarea>
+        <button class="send-btn" id="sendBtn" onclick="sendMsg()" style="display:none;">
+          <svg viewBox="0 0 24 24" fill="white" width="20" height="20"><path d="M2 21L23 12 2 3v7l15 2-15 2z"/></svg>
+        </button>
+        <button class="ibtn" id="micBtn">🎤</button>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- ══════════════════════════════════════════════════════
+     MODALS
+══════════════════════════════════════════════════════ -->
+
+<!-- ADD CONTACT -->
+<div class="modal-overlay" id="addContactModal" style="display:none;">
+  <div class="modal">
+    <div class="modal-hdr">
+      <button onclick="closeModal('addContactModal')">←</button>
+      <h3>Add Contact</h3>
+    </div>
+    <div class="modal-body">
+      <p style="color:#8696a0;font-size:14px;margin-bottom:16px;">Enter your friend's phone number to find them</p>
+      <div class="form-group">
+        <label>📱 Phone Number</label>
+        <input type="tel" id="findPhone" placeholder="+91 9876543210">
+      </div>
+      <div class="auth-error" id="findError"></div>
+      <button class="btn-primary full" onclick="findUser()">🔍 Find Contact</button>
+
+      <!-- Found user preview -->
+      <div id="foundUser" style="display:none;" class="found-user-card">
+        <div class="fu-av" id="fuAv"></div>
+        <div class="fu-info">
+          <div class="fu-name" id="fuName"></div>
+          <div class="fu-phone" id="fuPhone"></div>
+          <div class="fu-about" id="fuAbout"></div>
+        </div>
+        <button class="btn-primary" id="fuChatBtn" onclick="startChatWithFound()">Message</button>
+      </div>
+
+      <!-- All registered users -->
+      <div style="margin-top:20px;">
+        <p style="color:#8696a0;font-size:13px;margin-bottom:8px;">All users on ChatApp:</p>
+        <div id="allUsersList"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- NEW GROUP -->
+<div class="modal-overlay" id="newGroupModal" style="display:none;">
+  <div class="modal">
+    <div class="modal-hdr">
+      <button onclick="closeModal('newGroupModal')">←</button>
+      <h3>New Group</h3>
+    </div>
+    <div class="modal-body">
+      <div class="form-group">
+        <label>Group Name</label>
+        <input type="text" id="groupName" placeholder="Enter group name">
+      </div>
+      <p style="color:#8696a0;font-size:13px;margin-bottom:8px;">Add participants:</p>
+      <div id="selectedChips" class="chips-row"></div>
+      <div id="groupUserList" class="user-list"></div>
+      <div class="auth-error" id="groupError"></div>
+      <button class="btn-primary full" style="margin-top:12px;" onclick="createGroup()">✅ Create Group</button>
+    </div>
+  </div>
+</div>
+
+<!-- MY PROFILE -->
+<div class="modal-overlay" id="myProfileModal" style="display:none;">
+  <div class="modal">
+    <div class="modal-hdr">
+      <button onclick="closeModal('myProfileModal')">←</button>
+      <h3>My Profile</h3>
+    </div>
+    <div class="modal-body" id="myProfileBody"></div>
+  </div>
+</div>
+
+<!-- CONTACT INFO PANEL -->
+<div class="side-panel" id="contactPanel" style="display:none;">
+  <div class="panel-hdr">
+    <button class="icon-btn" onclick="closePanel()">←</button>
+    <h3 id="panelTitle">Contact Info</h3>
+  </div>
+  <div class="panel-body" id="panelBody"></div>
+</div>
+
+<!-- CONTEXT MENU -->
+<div class="ctx-menu" id="ctxMenu" style="display:none;"></div>
+<!-- TOAST -->
+<div class="toast" id="toastEl"></div>
+
+<script src="app.js"></script>
+</body>
+</html>

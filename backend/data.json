@@ -1,0 +1,95 @@
+{
+  "users": [
+    {
+      "id": "e807fe40-8d87-4d61-9d69-c46d421884a2",
+      "name": "Syed Ahmed",
+      "phone": "+917276490196",
+      "password": "$2b$10$dxHVViLKdgy/MA73hPm53ehoMvqaEt092VKEZiTE7nK7mRB/R0kcO",
+      "avatar": "SA",
+      "color": "#d4a843",
+      "about": "hey its my chatapp",
+      "online": true,
+      "lastSeen": null,
+      "createdAt": 1779182741175
+    },
+    {
+      "id": "20d40a93-6008-47d3-bdac-b485c7066dd6",
+      "name": "owais ahmed khan",
+      "phone": "9032978291",
+      "password": "$2b$10$u.87KD70whjuIwyAiOgIf.lX2s45UaCxdIjiA7jllrv/8Loq.zB6W",
+      "avatar": "OA",
+      "color": "#7fb77e",
+      "about": "hey its ahmed chatapp",
+      "online": false,
+      "lastSeen": 1779183046279,
+      "createdAt": 1779182934748
+    }
+  ],
+  "conversations": [
+    {
+      "id": "9b10d4cb-f486-419e-aa20-044b75a2958e",
+      "type": "direct",
+      "members": [
+        "20d40a93-6008-47d3-bdac-b485c7066dd6",
+        "e807fe40-8d87-4d61-9d69-c46d421884a2"
+      ],
+      "messages": [
+        {
+          "id": "8af667e0-d5cc-491a-96c3-fa7d783698be",
+          "from": "20d40a93-6008-47d3-bdac-b485c7066dd6",
+          "text": "hey ahmed",
+          "time": 1779182970925,
+          "replyTo": null,
+          "status": {
+            "20d40a93-6008-47d3-bdac-b485c7066dd6": "sent",
+            "e807fe40-8d87-4d61-9d69-c46d421884a2": "seen"
+          },
+          "reactions": [],
+          "deleted": false
+        },
+        {
+          "id": "85e98b35-5bd1-489a-8698-c660af62dc18",
+          "from": "e807fe40-8d87-4d61-9d69-c46d421884a2",
+          "text": "hey owais khan whatsapp",
+          "time": 1779182993769,
+          "replyTo": null,
+          "status": {
+            "20d40a93-6008-47d3-bdac-b485c7066dd6": "seen",
+            "e807fe40-8d87-4d61-9d69-c46d421884a2": "sent"
+          },
+          "reactions": [],
+          "deleted": false
+        },
+        {
+          "id": "f0f6d764-ca44-485c-bd0e-afc9fce1db19",
+          "from": "20d40a93-6008-47d3-bdac-b485c7066dd6",
+          "text": "helo",
+          "time": 1779183660157,
+          "replyTo": null,
+          "status": {
+            "20d40a93-6008-47d3-bdac-b485c7066dd6": "sent",
+            "e807fe40-8d87-4d61-9d69-c46d421884a2": "seen"
+          },
+          "reactions": [],
+          "deleted": false
+        },
+        {
+          "id": "101326f6-7787-422c-a305-445c4ef88432",
+          "from": "e807fe40-8d87-4d61-9d69-c46d421884a2",
+          "text": "heyy",
+          "time": 1779183679140,
+          "replyTo": null,
+          "status": {
+            "20d40a93-6008-47d3-bdac-b485c7066dd6": "seen",
+            "e807fe40-8d87-4d61-9d69-c46d421884a2": "sent"
+          },
+          "reactions": [],
+          "deleted": false
+        }
+      ],
+      "muted": {},
+      "pinned": {},
+      "createdAt": 1779182965816
+    }
+  ]
+}
